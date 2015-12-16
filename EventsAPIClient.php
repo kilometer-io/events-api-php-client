@@ -1,19 +1,5 @@
 <?php
-//namespace Kilometer;
-/**
- * Example:
-$userId = "splanger";
-$initialReferral = "http://google.com";
-
-
-$eventsApiClient = new EventsAPIClient("abcdefghi1234567890");
-$eventsApiClient->addUser($userId, $initialReferral);
-$eventsApiClient->addEvent($userId, "test_event", array("some_event_property" => "blahblah"));
-$eventsApiClient->updateUserProperties($userId, array("email" => "splanger@gmail.com"));
-$eventsApiClient->increaseUserProperty($userId, "age", 1);
-$eventsApiClient->decreaseUserProperty($userId, "age", 1);
- */
-
+namespace Kilometer;
 
 class EventsAPIClient
 {
