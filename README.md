@@ -7,24 +7,30 @@ Install Manually
 
 ```php
 <?php
-// import Kilometer
+// Import Kilometer
 require_once("KilometerAPIClient.php");
+use Kilometer\KilometerAPIClient;
 
-// using namespace
-use Kilometer\EventsAPIClient;
-
-// get the Kilometer class instance, replace with your APP_ID
-$kilometerApiClient = new Kilometer\EventsAPIClient("<<<APP_ID>>>");
+// Replace with your APP_ID
+$kilometerApiClient = new Kilometer\KilometerAPIClient("<<<APP_ID>>>");
 
 // track an event
-// Replace <<<USER-ID>>> with the unique identifier of your user (email or user_name).
-$kilometerApiClient->addUser("<<<USER-ID>>>", "initial referral");
-
-// send event for user id example@example.com
-$kilometerApiClient->addEvent("example@example.com", "event name", array(
-    'some_propert_key'      => "property_val",
-    'another_propert_key'   => "another_property_val"
+$kilometerApiClient->addEvent("<<<USER-ID>>>", "event_name",array(
+    "event_property" => "value",
+    "event_property_2" => "value_2"
 ));
+
+// Set or Update user property 
+$kilometerApiClient->updateUserProperties("<<<USER-ID>>>", array(
+    "property_1" => "value",
+    "property_2" => "value"
+));
+
+// Increase user property
+$kilometerApiClient->increaseUserProperty("<<<USER-ID>>>", "property","value");
+
+// Decrease user property
+$kilometerApiClient->decreaseUserProperty("<<<USER-ID>>>", "property","value");
 ```
 
 Documentation
