@@ -8,7 +8,7 @@ Install Manually
 ```php
 <?php
 // import Kilometer
-require_once("EventsAPIClient.php");
+require_once("KilometerAPIClient.php");
 
 // using namespace
 use Kilometer\EventsAPIClient;
@@ -18,7 +18,7 @@ $kilometerApiClient = new Kilometer\EventsAPIClient("<<<APP_ID>>>");
 
 // track an event
 // Replace <<<USER-ID>>> with the unique identifier of your user (email or user_name).
-$kilometerApiClient->addUser(<<<USER-ID>>>, "initial referral");
+$kilometerApiClient->addUser("<<<USER-ID>>>", "initial referral");
 
 // send event for user id example@example.com
 $kilometerApiClient->addEvent("example@example.com", "event name", array(

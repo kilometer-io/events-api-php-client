@@ -1,7 +1,7 @@
 <?php
 namespace Kilometer;
 
-class EventsAPIClient
+class KilometerAPIClient
 {
     private $customerAppId = 'test';
 
