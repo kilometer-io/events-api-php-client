@@ -56,6 +56,10 @@ class KilometerAPIClient
 
         $url = self::EVENTS_API_URL . "/events";
 
+        // Check if $eventProperties key have value as array or associate array
+        // and encoded it as string
+        $eventProperties = $this->checkForArray($eventProperties);
+
         // Prepare POST JSON data
         $data = array(
             "user_id" => $userId,
@@ -88,6 +92,10 @@ class KilometerAPIClient
     public function updateUserProperties($userId, $userProperties = array())
     {
         $url = self::EVENTS_API_URL . "/users/" . $userId . "/properties";
+
+        // Check if userProperties key have value as array or associate array
+        // and encoded it as string
+        $userProperties = $this->checkForArray($userProperties);
 
         // Prepare POST JSON data
         $data_string = json_encode($userProperties);
@@ -157,4 +165,22 @@ class KilometerAPIClient
         $milliseconds = round(microtime(true) * 1000);
         return $milliseconds;
     }
+
+    /**
+     * Check if associate array key have value as array or associate array
+     * if exist so need to convert and update that array to string, if not do nothing.
+     * @param associate array $data
+     * @return associate array $data
+     */
+    private function checkForArray($data) {
+
+        foreach ($data as $key => $val) {
+            if (is_array($val)) {
+                $data[$key] = json_encode($val);
+            }
+        }
+
+        return $data;
+    }
+
 }
