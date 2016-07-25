@@ -21,7 +21,8 @@ class KilometerAPIClient {
 
     }
 
-    public function addUser($userId, $initialReferral = "", $endpointUrl = null, $customerAppId = null) {
+    public function addUser($userId, $customProperties = null, $initialReferral = null,
+                            $endpointUrl = null, $customerAppId = null) {
 
         $endpointUrl = $endpointUrl ? $endpointUrl : self::EVENTS_API_URL;
         $customerAppId = $customerAppId ? $customerAppId : $this->customerAppId;
@@ -30,9 +31,17 @@ class KilometerAPIClient {
 
         // Prepare POST JSON data
         $data = array(
-            "user_id" => $userId,
-            "initial_referral" => $initialReferral
+            "user_id" => $userId
         );
+
+        if ($initialReferral != null) {
+            $data["context"] = array("initial_referral" => $initialReferral);
+        }
+
+        if ($customProperties != null) {
+            $customProperties = $this->arraysToString($customProperties);
+            $data["user_properties"] = $customProperties;
+        }
 
         $data_string = json_encode($data);
 
@@ -55,23 +64,21 @@ class KilometerAPIClient {
         return $result;
     }
 
-    public function addEvent($userId, $eventName, $eventProperties = array(), $endpointUrl = null, $customerAppId = null) {
+    public function addEvent($userId, $eventName, $eventProperties = array(),
+                             $endpointUrl = null, $customerAppId = null) {
 
         $endpointUrl = $endpointUrl ? $endpointUrl : self::EVENTS_API_URL;
         $customerAppId = $customerAppId ? $customerAppId : $this->customerAppId;
 
-        $url = $endpointUrl . "/events";
+        $url = $endpointUrl . "/users/" . rawurlencode($userId) . "/events";
 
         // Check if $eventProperties key have value as array or associate array and encoded it as string
         $eventProperties = $this->arraysToString($eventProperties);
 
         // Prepare POST JSON data
         $data = array(
-            "user_id" => $userId,
             "event_name" => $eventName,
-            "event_properties" => $eventProperties,
-            "event_type" => self::EVENT_TYPE
-
+            "custom_properties" => $eventProperties
         );
         $data_string = json_encode($data);
 
@@ -94,12 +101,13 @@ class KilometerAPIClient {
         return $result;
     }
 
-    public function updateUserProperties($userId, $userProperties = array(), $endpointUrl = null, $customerAppId = null) {
+    public function updateUserProperties($userId, $userProperties = array(),
+                                         $endpointUrl = null, $customerAppId = null) {
 
         $endpointUrl = $endpointUrl ? $endpointUrl : self::EVENTS_API_URL;
         $customerAppId = $customerAppId ? $customerAppId : $this->customerAppId;
 
-        $url = $endpointUrl . "/users/" . $userId . "/properties";
+        $url = $endpointUrl . "/users/" . rawurlencode($userId) . "/properties";
 
         // Check if $eventProperties key have value as array or associate array and encoded it as string
         $userProperties = $this->arraysToString($userProperties);
@@ -131,7 +139,7 @@ class KilometerAPIClient {
         $endpointUrl = $endpointUrl ? $endpointUrl : self::EVENTS_API_URL;
         $customerAppId = $customerAppId ? $customerAppId : $this->customerAppId;
 
-        $url = $endpointUrl . "/users/" . $userId . "/properties/" . $propertyName . "/increase/" . $amount;
+        $url = $endpointUrl . "/users/" . rawurlencode($userId) . "/properties/" . rawurlencode($propertyName) . "/increase/" . $amount;
 
         // Prepare and perform request
         $curl = curl_init($url);
@@ -155,7 +163,7 @@ class KilometerAPIClient {
         $endpointUrl = $endpointUrl ? $endpointUrl : self::EVENTS_API_URL;
         $customerAppId = $customerAppId ? $customerAppId : $this->customerAppId;
 
-        $url = $endpointUrl . "/users/" . $userId . "/properties/" . $propertyName . "/decrease/" . $amount;
+        $url = $endpointUrl . "/users/" . rawurlencode($userId) . "/properties/" . rawurlencode($propertyName) . "/decrease/" . $amount;
 
         // Prepare and perform request
         $curl = curl_init($url);
@@ -167,6 +175,63 @@ class KilometerAPIClient {
             self::HEADER_TIMESTAMP       . ": " . $this->getTimestamp(),
             self::HEADER_CUSTOMER_APP_ID . ": " . $customerAppId
         ));
+
+        $result = curl_exec($curl);
+        curl_close($curl);
+
+        return $result;
+    }
+
+    public function linkUserToGroup($userId, $groupId, $endpointUrl = null, $customerAppId = null) {
+
+        $endpointUrl = $endpointUrl ? $endpointUrl : self::EVENTS_API_URL;
+        $customerAppId = $customerAppId ? $customerAppId : $this->customerAppId;
+
+        $url = $endpointUrl . "/groups/" . rawurlencode($groupId) . "/link/" . rawurlencode($userId);
+
+        // Prepare and perform request
+        $curl = curl_init($url);
+
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            self::HEADER_CLIENT_TYPE     . ": " . self::CLIENT_TYPE,
+            self::HEADER_TIMESTAMP       . ": " . $this->getTimestamp(),
+            self::HEADER_CUSTOMER_APP_ID . ": " . $customerAppId
+        ));
+
+        $result = curl_exec($curl);
+        curl_close($curl);
+
+        return $result;
+    }
+
+    public function updateGroupProperties($groupId, $groupProperties = array(),
+                                          $endpointUrl = null, $customerAppId = null) {
+
+        $endpointUrl = $endpointUrl ? $endpointUrl : self::EVENTS_API_URL;
+        $customerAppId = $customerAppId ? $customerAppId : $this->customerAppId;
+
+        $url = $endpointUrl . "/groups/" . rawurlencode($groupId) . "/properties";
+
+        // Check if $eventProperties key have value as array or associate array and encoded it as string
+        $groupProperties = $this->arraysToString($groupProperties);
+
+        // Prepare POST JSON data
+        $data_string = json_encode($groupProperties);
+
+        // Prepare and perform request
+        $curl = curl_init($url);
+
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            self::HEADER_CLIENT_TYPE     . ": " . self::CLIENT_TYPE,
+            self::HEADER_CONTENT_TYPE    . ": " . "application/json",
+            self::HEADER_TIMESTAMP       . ": " . $this->getTimestamp(),
+            self::HEADER_CUSTOMER_APP_ID . ": " . $customerAppId
+        ));
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
 
         $result = curl_exec($curl);
         curl_close($curl);
